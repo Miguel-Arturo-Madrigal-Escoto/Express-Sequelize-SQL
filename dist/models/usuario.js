@@ -4,8 +4,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_1 = require("sequelize");
+const bcryptjs_1 = require("bcryptjs");
 const connection_1 = __importDefault(require("../database/connection"));
-const Usuario = connection_1.default.define('usuario', {
+class Usuario extends sequelize_1.Model {
+}
+Usuario.init({
+    id: {
+        type: sequelize_1.DataTypes.INTEGER,
+        unique: true,
+        autoIncrement: true,
+        primaryKey: true
+    },
     nombre: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false
@@ -16,12 +25,18 @@ const Usuario = connection_1.default.define('usuario', {
     },
     password: {
         type: sequelize_1.DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        set(psw) {
+            this.setDataValue('password', (0, bcryptjs_1.hashSync)(psw, (0, bcryptjs_1.genSaltSync)()));
+        },
     },
     estado: {
         type: sequelize_1.DataTypes.BOOLEAN,
-        defaultValue: true
+        defaultValue: true,
     }
+}, {
+    modelName: 'usuario',
+    sequelize: connection_1.default // conexion
 });
 exports.default = Usuario;
 //# sourceMappingURL=usuario.js.map

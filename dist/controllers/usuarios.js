@@ -12,10 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.eliminarUsuario = exports.actualizarUsuario = exports.registerUsuario = exports.getUsuario = exports.getUsuarios = void 0;
+exports.logIn = exports.eliminarUsuario = exports.actualizarUsuario = exports.registerUsuario = exports.getUsuario = exports.getUsuarios = void 0;
 const usuario_1 = __importDefault(require("../models/usuario"));
+const bcryptjs_1 = require("bcryptjs");
 const getUsuarios = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const usuarios = yield usuario_1.default.findAll({ attributes: { exclude: ['password'] }, where: {
+    const usuarios = yield usuario_1.default.findAll({ attributes: { exclude: ['password', 'estado', 'createdAt', 'updatedAt'] }, where: {
             estado: true
         } });
     /*const usuarios = await db.query('SELECT * FROM usuarios', {
@@ -28,15 +29,14 @@ const getUsuarios = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.getUsuarios = getUsuarios;
 const getUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const usuario = yield usuario_1.default.findByPk(id, {
-        attributes: ['id', 'nombre', 'email']
-    });
+    const usuario = yield usuario_1.default.findByPk(id, { attributes: ['id', 'nombre', 'email'] });
     /*const usuario = await db.query('SELECT id, nombre, email FROM usuarios WHERE id = :id',{
-        //replacements: [id],
+        //replacements: [id] -> ?,
         replacements: {
-            id
+            id -> :id
         },
         type: QueryTypes.SELECT,
+        
     })*/
     if (!usuario) {
         return res.status(404).json({
@@ -49,13 +49,28 @@ const getUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     });
 });
 exports.getUsuario = getUsuario;
-const registerUsuario = (req, res) => {
+const registerUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { body } = req;
-    res.json({
-        msg: 'register Usuario',
-        body
-    });
-};
+    try {
+        const usuario = usuario_1.default.build(body);
+        //usuario.password = 'xd'
+        const { nombre, id, email } = yield usuario.save();
+        // same as
+        // const usuario = await Usuario.create(body);
+        res.json({
+            ok: true,
+            usuario: {
+                id, nombre, email
+            }
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            ok: false,
+            msg: 'Hable con el administrador'
+        });
+    }
+});
 exports.registerUsuario = registerUsuario;
 const actualizarUsuario = (req, res) => {
     const { id } = req.params;
@@ -75,4 +90,41 @@ const eliminarUsuario = (req, res) => {
     });
 };
 exports.eliminarUsuario = eliminarUsuario;
+const logIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email, password } = req.body;
+    try {
+        const usuario = yield usuario_1.default.findOne({ where: { email } });
+        if (!usuario) {
+            res.status(404).json({
+                ok: false,
+                msg: 'Email y/o password invalidos'
+            });
+        }
+        else {
+            if ((0, bcryptjs_1.compareSync)(password, usuario.password)) {
+                res.status(200).json({
+                    ok: true,
+                    usuario: {
+                        id: usuario.id,
+                        nombre: usuario.nombre,
+                        email
+                    }
+                });
+            }
+            else {
+                res.status(404).json({
+                    ok: false,
+                    msg: 'Email y/o password invalidos'
+                });
+            }
+        }
+    }
+    catch (error) {
+        res.status(500).json({
+            ok: false,
+            msg: 'Hable con el administrador'
+        });
+    }
+});
+exports.logIn = logIn;
 //# sourceMappingURL=usuarios.js.map
