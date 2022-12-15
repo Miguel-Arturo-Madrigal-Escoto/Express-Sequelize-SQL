@@ -12,3 +12,13 @@ export const validateRegistroUsuario: ValidationChain[] = [
     }),
     body('password', 'Contraseña requerida').not().isEmpty()
 ]
+
+export const validateLogInUsuario: ValidationChain[] = [
+    body('email', 'Email invalido').isEmail()
+    .custom(async (email: string) => {
+        const usuario = await Usuario.findOne({ where: { email } });
+        if (!usuario) throw new Error('Email y/o password invalidos');
+        return true;
+    }),
+    body('password', 'Contraseña requerida').not().isEmpty()
+]

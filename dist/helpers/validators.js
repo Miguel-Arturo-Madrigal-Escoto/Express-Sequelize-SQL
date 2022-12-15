@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateRegistroUsuario = void 0;
+exports.validateLogInUsuario = exports.validateRegistroUsuario = void 0;
 const express_validator_1 = require("express-validator");
 const usuario_1 = __importDefault(require("../models/usuario"));
 exports.validateRegistroUsuario = [
@@ -22,6 +22,16 @@ exports.validateRegistroUsuario = [
         const usuario = yield usuario_1.default.findOne({ where: { email } });
         if (usuario)
             throw new Error('Ya existe un usuario con ese email');
+        return true;
+    })),
+    (0, express_validator_1.body)('password', 'Contraseña requerida').not().isEmpty()
+];
+exports.validateLogInUsuario = [
+    (0, express_validator_1.body)('email', 'Email invalido').isEmail()
+        .custom((email) => __awaiter(void 0, void 0, void 0, function* () {
+        const usuario = yield usuario_1.default.findOne({ where: { email } });
+        if (!usuario)
+            throw new Error('Email y/o password invalidos');
         return true;
     })),
     (0, express_validator_1.body)('password', 'Contraseña requerida').not().isEmpty()

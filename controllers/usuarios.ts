@@ -105,31 +105,23 @@ const logIn = async (req: Request, res: Response) => {
 
         const usuario = await Usuario.findOne({ where: { email } });
 
-        if (!usuario){
+
+        if (compareSync(password, usuario!.password)){
+            res.status(200).json({
+                ok: true,
+                usuario: {
+                    id: usuario!.id,
+                    nombre: usuario!.nombre,
+                    email
+                }
+            })
+        }
+        else {
             res.status(404).json({
                 ok: false,
                 msg: 'Email y/o password invalidos'
             })
         }
-        else {
-            if (compareSync(password, usuario.password)){
-                res.status(200).json({
-                    ok: true,
-                    usuario: {
-                        id: usuario.id,
-                        nombre: usuario.nombre,
-                        email
-                    }
-                })
-            }
-            else {
-                res.status(404).json({
-                    ok: false,
-                    msg: 'Email y/o password invalidos'
-                })
-            }
-        }
-
              
     } catch (error) {
         res.status(500).json({

@@ -95,29 +95,21 @@ const logIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
     try {
         const usuario = yield usuario_1.default.findOne({ where: { email } });
-        if (!usuario) {
+        if ((0, bcryptjs_1.compareSync)(password, usuario.password)) {
+            res.status(200).json({
+                ok: true,
+                usuario: {
+                    id: usuario.id,
+                    nombre: usuario.nombre,
+                    email
+                }
+            });
+        }
+        else {
             res.status(404).json({
                 ok: false,
                 msg: 'Email y/o password invalidos'
             });
-        }
-        else {
-            if ((0, bcryptjs_1.compareSync)(password, usuario.password)) {
-                res.status(200).json({
-                    ok: true,
-                    usuario: {
-                        id: usuario.id,
-                        nombre: usuario.nombre,
-                        email
-                    }
-                });
-            }
-            else {
-                res.status(404).json({
-                    ok: false,
-                    msg: 'Email y/o password invalidos'
-                });
-            }
         }
     }
     catch (error) {
