@@ -1,5 +1,5 @@
 import { Response, Request } from 'express';
-import { QueryTypes } from 'sequelize';
+import { QueryTypes, where } from 'sequelize';
 import Usuario from '../models/usuario';
 import { compareSync } from 'bcryptjs';
 
@@ -75,16 +75,51 @@ const registerUsuario = async (req: Request, res: Response) => {
     }
 }
 
-const actualizarUsuario = (req: Request, res: Response) => {
+const actualizarUsuario = async (req: Request, res: Response) => {
 
     const { id } = req.params;
     const { body } = req;
+    const { id: _id, ..._body } = body;
 
-    res.json({
-        msg: 'actualizar Usuario',
-        id,
-        body
-    })
+    try {
+
+        const usuario = await Usuario.findByPk(id);
+        
+        if (body.password){
+            if (!compareSync(body.password, usuario!.password)){
+                return res.status(404).json({
+                    ok: false,
+                    msg: 'Contraseña incorrecta'
+                });
+            }
+            
+            //const user = await Usuario!.update(_body, { where: { id } });
+            const { id, email, nombre } = await usuario!.update(_body);
+
+            return res.status(201).json({
+                ok: true,
+                msg: 'Registro actualizado',
+                usuario: { id, email, nombre }
+            });
+        }
+        else {
+            //const user = await Usuario!.update(_body, { where: { id } });
+            const { id, email, nombre } = await usuario!.update(_body);
+            return res.status(201).json({
+                ok: true,
+                msg: 'Registro actualizado',
+                usuario: { id, email, nombre }
+            });
+        }
+
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Hable con el administrador'
+        })
+    }
 }
 
 const eliminarUsuario = (req: Request, res: Response) => {

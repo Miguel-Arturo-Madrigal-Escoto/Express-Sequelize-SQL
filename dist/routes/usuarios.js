@@ -9,7 +9,7 @@ router.get('/', usuarios_1.getUsuarios);
 router.get('/:id', usuarios_1.getUsuario);
 router.post('/', validators_1.validateRegistroUsuario, validateData_1.validateData, usuarios_1.registerUsuario);
 router.post('/login', validators_1.validateLogInUsuario, validateData_1.validateData, usuarios_1.logIn);
-router.put('/:id', usuarios_1.actualizarUsuario);
+router.put('/:id', validators_1.validateUpdateUsuario, validateData_1.validateData, usuarios_1.actualizarUsuario);
 router.delete('/:id', usuarios_1.eliminarUsuario);
 exports.default = router;
 //# sourceMappingURL=usuarios.js.map

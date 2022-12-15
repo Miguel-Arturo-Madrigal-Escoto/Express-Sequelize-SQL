@@ -1,4 +1,4 @@
-import { ValidationChain, body } from "express-validator";
+import { ValidationChain, body, param } from "express-validator";
 import Usuario from "../models/usuario";
 
 
@@ -21,4 +21,20 @@ export const validateLogInUsuario: ValidationChain[] = [
         return true;
     }),
     body('password', 'Contraseña requerida').not().isEmpty()
+]
+
+export const validateUpdateUsuario: ValidationChain[] = [
+    param('id', 'Id invalido/no proporcionado').notEmpty(),
+    param('id', 'Id invalido/no proporcionado').isNumeric()
+    .custom(async (id: number) => {
+        const usuario = await Usuario.findByPk(Number(id));
+        if (!usuario) throw new Error('Usuario inexistente');
+        return true;    
+    }),
+    body('email', 'Email invalido').isEmail()
+    .custom(async (email: string) => {
+        const usuario = await Usuario.findOne({ where: { email } });
+        if (usuario) throw new Error('Correo en uso');
+        return true;
+    }),
 ]
