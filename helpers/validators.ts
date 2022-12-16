@@ -38,3 +38,13 @@ export const validateUpdateUsuario: ValidationChain[] = [
         return true;
     }),
 ]
+
+export const validateDeleteUsuario: ValidationChain[] = [
+    param('id', 'Id invalido/no proporcionado').notEmpty(),
+    param('id', 'Id invalido/no proporcionado').isNumeric()
+    .custom(async (id: number) => {
+        const usuario = await Usuario.findByPk(Number(id));
+        if (!usuario) throw new Error('Usuario inexistente');
+        return true;    
+    }),
+]

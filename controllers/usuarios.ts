@@ -122,14 +122,33 @@ const actualizarUsuario = async (req: Request, res: Response) => {
     }
 }
 
-const eliminarUsuario = (req: Request, res: Response) => {
+const eliminarUsuario = async (req: Request, res: Response) => {
 
     const { id } = req.params;
 
-    res.json({
-        msg: 'borrar Usuario',
-        id,
-    })
+    try {
+
+        const usuario = await Usuario.findByPk(id);
+
+        // borrado físico
+        //await usuario!.destroy();
+        const { id: _id, email, nombre, estado } = await usuario!.update({ estado: false });
+
+        return res.status(200).json({
+            ok: true,
+            msg: 'Registro eliminado',
+            usuario: {
+                id: _id, email, nombre, estado
+            }
+        });
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Hable con el administrador'
+        });
+    }
 }
 
 const logIn = async (req: Request, res: Response) => {

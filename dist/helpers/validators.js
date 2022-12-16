@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateUpdateUsuario = exports.validateLogInUsuario = exports.validateRegistroUsuario = void 0;
+exports.validateDeleteUsuario = exports.validateUpdateUsuario = exports.validateLogInUsuario = exports.validateRegistroUsuario = void 0;
 const express_validator_1 = require("express-validator");
 const usuario_1 = __importDefault(require("../models/usuario"));
 exports.validateRegistroUsuario = [
@@ -50,6 +50,16 @@ exports.validateUpdateUsuario = [
         const usuario = yield usuario_1.default.findOne({ where: { email } });
         if (usuario)
             throw new Error('Correo en uso');
+        return true;
+    })),
+];
+exports.validateDeleteUsuario = [
+    (0, express_validator_1.param)('id', 'Id invalido/no proporcionado').notEmpty(),
+    (0, express_validator_1.param)('id', 'Id invalido/no proporcionado').isNumeric()
+        .custom((id) => __awaiter(void 0, void 0, void 0, function* () {
+        const usuario = yield usuario_1.default.findByPk(Number(id));
+        if (!usuario)
+            throw new Error('Usuario inexistente');
         return true;
     })),
 ];

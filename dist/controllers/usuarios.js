@@ -124,13 +124,29 @@ const actualizarUsuario = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.actualizarUsuario = actualizarUsuario;
-const eliminarUsuario = (req, res) => {
+const eliminarUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    res.json({
-        msg: 'borrar Usuario',
-        id,
-    });
-};
+    try {
+        const usuario = yield usuario_1.default.findByPk(id);
+        // borrado físico
+        //await usuario!.destroy();
+        const { id: _id, email, nombre, estado } = yield usuario.update({ estado: false });
+        return res.status(200).json({
+            ok: true,
+            msg: 'Registro eliminado',
+            usuario: {
+                id: _id, email, nombre, estado
+            }
+        });
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Hable con el administrador'
+        });
+    }
+});
 exports.eliminarUsuario = eliminarUsuario;
 const logIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
